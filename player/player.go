@@ -23,3 +23,7 @@ func orderPlayers(availableplayers []player) []player {
 	})
 	return availableplayers
 }
+
+//	availableplayers := []player{}
+//	availableplayers = append(availableplayers, *p, *p2, *p3, *p4)
+//	availableplayers = orderPlayers(availableplayers)
