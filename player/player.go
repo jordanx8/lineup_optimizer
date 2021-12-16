@@ -1,5 +1,10 @@
 package player
 
+import (
+	"fmt"
+	"sort"
+)
+
 type player struct {
 	name      string
 	positions []string
