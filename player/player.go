@@ -28,6 +28,14 @@ func remove(slice []player, s int) []player {
 	return append(slice[:s], slice[s+1:]...)
 }
 
+func setUtils(availableplayers []player, lineup map[string]player) (map[string]player, []player) {
+	lineup["Util"] = availableplayers[0]
+	lineup["Util2"] = availableplayers[1]
+	availableplayers = remove(availableplayers, 0)
+	availableplayers = remove(availableplayers, 0)
+	return lineup, availableplayers
+}
+
 func setLineup(availableplayers []player, lineup map[string]player) (map[string]player, []player) {
 	i := 0
 	j := 0
