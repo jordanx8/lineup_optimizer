@@ -17,26 +17,36 @@ func newPlayer(name string, positions []string, team string, points int) *player
 	return &p
 }
 
-func setLineup(availableplayers []player, lineup map[string]player) map[string]player {
+func setLineup(availableplayers []player, lineup map[string]player) (map[string]player, []player) {
 	i := 0
 	j := 0
+	removed := false
 
 	for j < len(availableplayers) {
 		i = 0
 		for i < len(availableplayers[j].positions) {
+			fmt.Println("Checking if", availableplayers[j], "can be added to position", availableplayers[j].positions[i])
 			if value, ok := lineup[availableplayers[j].positions[i]]; ok {
-				fmt.Println("Player already at this position: ", availableplayers[j].positions[i])
-				fmt.Println("value: ", value)
+				fmt.Println(value, "already at position", availableplayers[j].positions[i])
+				if i == len(availableplayers[j].positions)-1 {
+					fmt.Println("No open spots available for", availableplayers[j])
+				}
 			} else {
-				fmt.Println(availableplayers[j].positions[i], "position is open, adding player to lineup")
+				fmt.Println(availableplayers[j].positions[i], "position is open, adding", availableplayers[j], "to lineup")
 				lineup[availableplayers[j].positions[i]] = availableplayers[j]
 				i = len(availableplayers[j].positions) //end loop when player is added to lineup
+				availableplayers = remove(availableplayers, j)
+				removed = true
 			}
 			i++
 		}
-		j++
+		if removed {
+			removed = false
+		} else {
+			j++
+		}
 	}
-	return lineup
+	return lineup, availableplayers
 }
 
 func orderPlayers(availableplayers []player) []player {
