@@ -17,6 +17,17 @@ func newPlayer(name string, positions []string, team string, points int) *player
 	return &p
 }
 
+func orderPlayers(availableplayers []player) []player {
+	sort.SliceStable(availableplayers, func(i, j int) bool {
+		return availableplayers[i].points > availableplayers[j].points
+	})
+	return availableplayers
+}
+
+func remove(slice []player, s int) []player {
+	return append(slice[:s], slice[s+1:]...)
+}
+
 func setLineup(availableplayers []player, lineup map[string]player) (map[string]player, []player) {
 	i := 0
 	j := 0
@@ -70,13 +81,6 @@ func setLineup(availableplayers []player, lineup map[string]player) (map[string]
 		}
 	}
 	return lineup, availableplayers
-}
-
-func orderPlayers(availableplayers []player) []player {
-	sort.SliceStable(availableplayers, func(i, j int) bool {
-		return availableplayers[i].points > availableplayers[j].points
-	})
-	return availableplayers
 }
 
 //	availableplayers := []player{}
