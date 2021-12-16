@@ -39,20 +39,19 @@ func setLineup(availableplayers []player, lineup map[string]player) (map[string]
 							for l < len(value.positions) {
 								if value2, ok := lineup[value.positions[l]]; ok {
 									fmt.Println(value2, "already at position", value.positions[l])
-
 								} else {
 									fmt.Println(value.positions[l], "IS OPEN")
 									lineup[value.positions[l]] = value
 									fmt.Println(value, "has been moved from", availableplayers[j].positions[k], "to", value.positions[l])
 									lineup[availableplayers[j].positions[k]] = availableplayers[j]
 									fmt.Println("Adding", availableplayers[j], "to position", availableplayers[j].positions[k])
+									availableplayers = remove(availableplayers, j)
+									removed = true
 								}
 								l++
 							}
 						}
-
 						k++
-
 					}
 				}
 			} else {
