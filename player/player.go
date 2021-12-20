@@ -8,7 +8,6 @@ import (
 type player struct {
 	name      string
 	positions []string
-	team      string
 	points    int
 }
 
