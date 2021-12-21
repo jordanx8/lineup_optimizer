@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
+	"github.com/jordanx8/lineup_optimizer/player"
 )
 
 func main() {
@@ -24,7 +25,6 @@ func main() {
 	// create chrome instance
 	ctx, cancel := chromedp.NewContext(
 		context.Background(),
-		// chromedp.WithDebugf(log.Printf),
 	)
 	defer cancel()
 
@@ -32,7 +32,6 @@ func main() {
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	var buf []byte
 	var nodes []*cdp.Node
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(`https://login.yahoo.com/`),
@@ -52,17 +51,30 @@ func main() {
 	}
 	var url = "https://basketball.fantasysports.yahoo.com/" + nodes[19].AttributeValue("href")
 
+	var playerNames []string
+	var playerData []string
 	err = chromedp.Run(ctx,
 		chromedp.Navigate(url),
 		chromedp.Sleep(2*time.Second),
-		chromedp.CaptureScreenshot(&buf),
+		chromedp.Evaluate(`[...document.querySelectorAll('#statTable0 a.Nowrap')].map((e) => e.innerText)`, &playerNames),
+		chromedp.Evaluate(`[...document.querySelectorAll('#statTable0 span.Fz-xxs')].map((e) => e.innerText)`, &playerData),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ioutil.WriteFile("screenshot.png", buf, 0644)
-	if err != nil {
-		log.Fatal(err)
+	// fmt.Println(playerNames)
+	// fmt.Println(playerData)
+
+	var players []player.Player
+	var positions []string
+	a := 0
+
+	// TODO: add extra positions (C2, G etc.)
+	for _, b := range playerNames {
+		positions = strings.Split(playerData[a][6:], ",")
+		players = append(players, *player.NewPlayer(b, positions, playerData[a+1], 0))
+		a = a + 2
 	}
+	fmt.Println("Players: ", players)
 }

@@ -5,9 +5,10 @@ import (
 	"sort"
 )
 
-type player struct {
+type Player struct {
 	name      string
 	positions []string
+	status    string
 	points    int
 }
 
@@ -16,31 +17,31 @@ type player struct {
 //	lineup["SG"] = *p2
 //	fmt.Println(lineup)
 
-func newPlayer(name string, positions []string, points int) *player {
-	p := player{name: name, positions: positions, points: points}
+func NewPlayer(name string, positions []string, status string, points int) *Player {
+	p := Player{name: name, positions: positions, status: status, points: points}
 	return &p
 }
 
-func orderPlayers(availableplayers []player) []player {
+func OrderPlayers(availableplayers []Player) []Player {
 	sort.SliceStable(availableplayers, func(i, j int) bool {
 		return availableplayers[i].points > availableplayers[j].points
 	})
 	return availableplayers
 }
 
-func remove(slice []player, s int) []player {
+func Remove(slice []Player, s int) []Player {
 	return append(slice[:s], slice[s+1:]...)
 }
 
-func setUtils(availableplayers []player, lineup map[string]player) (map[string]player, []player) {
+func SetUtils(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
 	lineup["Util"] = availableplayers[0]
 	lineup["Util2"] = availableplayers[1]
-	availableplayers = remove(availableplayers, 0)
-	availableplayers = remove(availableplayers, 0)
+	availableplayers = Remove(availableplayers, 0)
+	availableplayers = Remove(availableplayers, 0)
 	return lineup, availableplayers
 }
 
-func setLineup(availableplayers []player, lineup map[string]player) (map[string]player, []player) {
+func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
 	i := 0
 	j := 0
 	removed := false
@@ -68,7 +69,7 @@ func setLineup(availableplayers []player, lineup map[string]player) (map[string]
 									fmt.Println(value, "has been moved from", availableplayers[j].positions[k], "to", value.positions[l])
 									lineup[availableplayers[j].positions[k]] = availableplayers[j]
 									fmt.Println("Adding", availableplayers[j], "to position", availableplayers[j].positions[k])
-									availableplayers = remove(availableplayers, j)
+									availableplayers = Remove(availableplayers, j)
 									removed = true
 								}
 								l++
@@ -81,7 +82,7 @@ func setLineup(availableplayers []player, lineup map[string]player) (map[string]
 				fmt.Println(availableplayers[j].positions[i], "position is open, adding", availableplayers[j], "to lineup")
 				lineup[availableplayers[j].positions[i]] = availableplayers[j]
 				i = len(availableplayers[j].positions) //end loop when player is added to lineup
-				availableplayers = remove(availableplayers, j)
+				availableplayers = Remove(availableplayers, j)
 				removed = true
 			}
 			i++
