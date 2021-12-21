@@ -12,6 +12,30 @@ type Player struct {
 	points    int
 }
 
+func AddExtraPositions(positions []string) []string {
+	alreadyhasF := false
+	alreadyhasG := false
+	for _, b := range positions {
+		if !alreadyhasG && b == "PG" {
+			positions = append(positions, "G")
+			alreadyhasG = true
+		} else if !alreadyhasG && b == "SG" {
+			positions = append(positions, "G")
+			alreadyhasG = true
+		} else if !alreadyhasF && b == "SF" {
+			positions = append(positions, "F")
+			alreadyhasF = true
+		} else if !alreadyhasF && b == "PF" {
+			positions = append(positions, "F")
+			alreadyhasF = true
+		} else if b == "C" {
+			positions = append(positions, "C2")
+			alreadyhasF = true
+		}
+	}
+	return positions
+}
+
 //	lineup := make(map[string]player)
 //	lineup["PG"] = *p
 //	lineup["SG"] = *p2

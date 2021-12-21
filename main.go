@@ -70,9 +70,10 @@ func main() {
 	var positions []string
 	a := 0
 
-	// TODO: add extra positions (C2, G etc.)
+	// TODO: add player projected weekly points total
 	for _, b := range playerNames {
 		positions = strings.Split(playerData[a][6:], ",")
+		positions = player.AddExtraPositions(positions)
 		players = append(players, *player.NewPlayer(b, positions, playerData[a+1], 0))
 		a = a + 2
 	}
