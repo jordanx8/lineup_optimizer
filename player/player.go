@@ -16,8 +16,8 @@ type player struct {
 //	lineup["SG"] = *p2
 //	fmt.Println(lineup)
 
-func newPlayer(name string, positions []string, team string, points int) *player {
-	p := player{name: name, positions: positions, team: team, points: points}
+func newPlayer(name string, positions []string, points int) *player {
+	p := player{name: name, positions: positions, points: points}
 	return &p
 }
 
