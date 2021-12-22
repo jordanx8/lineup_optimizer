@@ -1,7 +1,6 @@
 package player
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -9,15 +8,15 @@ type Player struct {
 	name      string
 	positions []string
 	status    string
-	points    int
+	points    float32
 }
 
-func OptimizeLineup(availableplayers []string) map[string]Player {
-	lineup := make(map[string]player)
+func OptimizeLineup(availableplayers []Player) (map[string]Player, []Player) {
+	lineup := make(map[string]Player)
 	availableplayers = OrderPlayers(availableplayers)
 	lineup, availableplayers = SetLineup(availableplayers, lineup)
 	lineup, availableplayers = SetUtils(availableplayers, lineup)
-	return lineup
+	return lineup, availableplayers
 }
 
 func AddExtraPositions(positions []string) []string {
@@ -44,7 +43,7 @@ func AddExtraPositions(positions []string) []string {
 	return positions
 }
 
-func NewPlayer(name string, positions []string, status string, points int) *Player {
+func NewPlayer(name string, positions []string, status string, points float32) *Player {
 	p := Player{name: name, positions: positions, status: status, points: points}
 	return &p
 }
@@ -76,26 +75,26 @@ func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]
 	for j < len(availableplayers) {
 		i = 0
 		for i < len(availableplayers[j].positions) {
-			fmt.Println("Checking if", availableplayers[j], "can be added to position", availableplayers[j].positions[i])
-			if value, ok := lineup[availableplayers[j].positions[i]]; ok {
-				fmt.Println(value, "already at position", availableplayers[j].positions[i])
+			// fmt.Println("Checking if", availableplayers[j], "can be added to position", availableplayers[j].positions[i])
+			if _, ok := lineup[availableplayers[j].positions[i]]; ok {
+				// fmt.Println(value, "already at position", availableplayers[j].positions[i])
 				if i == len(availableplayers[j].positions)-1 {
-					fmt.Println("No open spots available for", availableplayers[j])
+					// fmt.Println("No open spots available for", availableplayers[j])
 					k := 0
-					fmt.Println("Checking if another player can be moved to make room for", availableplayers[j])
+					// fmt.Println("Checking if another player can be moved to make room for", availableplayers[j])
 					for k < len(availableplayers[j].positions) {
 						if value, ok := lineup[availableplayers[j].positions[k]]; ok {
-							fmt.Println("Checking if", value, "at", availableplayers[j].positions[k], "can be moved")
+							// fmt.Println("Checking if", value, "at", availableplayers[j].positions[k], "can be moved")
 							l := 0
 							for l < len(value.positions) {
-								if value2, ok := lineup[value.positions[l]]; ok {
-									fmt.Println(value2, "already at position", value.positions[l])
+								if _, ok := lineup[value.positions[l]]; ok {
+									// fmt.Println(value2, "already at position", value.positions[l])
 								} else {
-									fmt.Println(value.positions[l], "IS OPEN")
+									// fmt.Println(value.positions[l], "IS OPEN")
 									lineup[value.positions[l]] = value
-									fmt.Println(value, "has been moved from", availableplayers[j].positions[k], "to", value.positions[l])
+									// fmt.Println(value, "has been moved from", availableplayers[j].positions[k], "to", value.positions[l])
 									lineup[availableplayers[j].positions[k]] = availableplayers[j]
-									fmt.Println("Adding", availableplayers[j], "to position", availableplayers[j].positions[k])
+									// fmt.Println("Adding", availableplayers[j], "to position", availableplayers[j].positions[k])
 									availableplayers = Remove(availableplayers, j)
 									removed = true
 								}
@@ -106,7 +105,7 @@ func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]
 					}
 				}
 			} else {
-				fmt.Println(availableplayers[j].positions[i], "position is open, adding", availableplayers[j], "to lineup")
+				// fmt.Println(availableplayers[j].positions[i], "position is open, adding", availableplayers[j], "to lineup")
 				lineup[availableplayers[j].positions[i]] = availableplayers[j]
 				i = len(availableplayers[j].positions) //end loop when player is added to lineup
 				availableplayers = Remove(availableplayers, j)
