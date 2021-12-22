@@ -12,14 +12,14 @@ import (
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
 	"github.com/jordanx8/lineup_optimizer/player"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 func getPassword() string {
 	fmt.Println("\nPassword: ")
 	// https://godoc.org/golang.org/x/crypto/ssh/terminal#ReadPassword
 	// terminal.ReadPassword accepts file descriptor as argument, returns byte slice and error.
-	passwd, e := terminal.ReadPassword(int(os.Stdin.Fd()))
+	passwd, e := term.ReadPassword(int(os.Stdin.Fd()))
 	if e != nil {
 		log.Fatal(e)
 	}
