@@ -44,11 +44,6 @@ func AddExtraPositions(positions []string) []string {
 	return positions
 }
 
-//	lineup := make(map[string]player)
-//	lineup["PG"] = *p
-//	lineup["SG"] = *p2
-//	fmt.Println(lineup)
-
 func NewPlayer(name string, positions []string, status string, points int) *Player {
 	p := Player{name: name, positions: positions, status: status, points: points}
 	return &p
@@ -127,7 +122,3 @@ func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]
 	}
 	return lineup, availableplayers
 }
-
-//	availableplayers := []player{}
-//	availableplayers = append(availableplayers, *p, *p2, *p3, *p4)
-//	availableplayers = orderPlayers(availableplayers)
