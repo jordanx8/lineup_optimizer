@@ -12,6 +12,14 @@ type Player struct {
 	points    int
 }
 
+func OptimizeLineup(availableplayers []string) map[string]Player {
+	lineup := make(map[string]player)
+	availableplayers = OrderPlayers(availableplayers)
+	lineup, availableplayers = SetLineup(availableplayers, lineup)
+	lineup, availableplayers = SetUtils(availableplayers, lineup)
+	return lineup
+}
+
 func AddExtraPositions(positions []string) []string {
 	alreadyhasF := false
 	alreadyhasG := false
