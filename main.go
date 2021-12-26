@@ -157,8 +157,8 @@ func main() {
 	fmt.Println("C    -", lineup["C2"])
 	fmt.Println("Util -", lineup["Util"])
 	fmt.Println("Util -", lineup["Util2"])
-	fmt.Println("BN/IL Players: ", players, "\n")
-
+	fmt.Println("BN/IL Players: ", players)
+	fmt.Print("\n")
 	fmt.Println("Press Enter to Exit")
 	fmt.Scanln()
 	fmt.Println("exiting...")
