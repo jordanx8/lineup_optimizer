@@ -16,15 +16,15 @@ import (
 )
 
 func getPassword() string {
-	fmt.Println("\nPassword: ")
+	fmt.Println("Enter password: ")
 	// https://godoc.org/golang.org/x/crypto/ssh/terminal#ReadPassword
 	// terminal.ReadPassword accepts file descriptor as argument, returns byte slice and error.
-	passwd, e := term.ReadPassword(int(os.Stdin.Fd()))
+	password, e := term.ReadPassword(int(os.Stdin.Fd()))
 	if e != nil {
 		log.Fatal(e)
 	}
 	// Type cast byte slice to string.
-	return string(passwd)
+	return string(password)
 }
 
 func main() {
@@ -47,6 +47,7 @@ func main() {
 
 	fmt.Println("Received username/password; logging in")
 	var nodes []*cdp.Node
+	// logs into yahoo with username/password and gets link for weekly lineup
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(`https://login.yahoo.com/`),
 		chromedp.WaitVisible(`username-challenge`),
@@ -63,13 +64,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Logged in. Attempting to scrape players information.")
+	fmt.Println("Logged in. Attempting to scrape players' information.")
 
 	var url = "https://basketball.fantasysports.yahoo.com/" + nodes[19].AttributeValue("href")
 
 	var playerNames []string
 	var playerData []string
 	nodes = nil
+	// navigates to weekly lineup and gathers players' names and info
 	err = chromedp.Run(ctx,
 		chromedp.Navigate(url),
 		chromedp.Sleep(2*time.Second),
@@ -85,6 +87,7 @@ func main() {
 	var playerPoints []float32
 	url = nodes[2].AttributeValue("href")
 	fmt.Println("Scanning Day 1")
+	// navigates to tab of daily projected fantasy scores and gathers first day of players' projected scores
 	err = chromedp.Run(ctx,
 		chromedp.Navigate(url),
 		chromedp.Sleep(2*time.Second),
@@ -101,6 +104,7 @@ func main() {
 		}
 	}
 
+	// loops and goes through each day of projected fantasy scores for the week and adds them together
 	day := 2
 	for day < 8 {
 		fmt.Printf("Scanning Day %d\n", day)
@@ -119,8 +123,6 @@ func main() {
 		}
 		day++
 	}
-
-	fmt.Println("Player scrape complete. Creating players array.")
 
 	var players []player.Player
 	var positions []string
