@@ -16,6 +16,8 @@ func OptimizeLineup(availableplayers []Player) (map[string]Player, []Player) {
 	availableplayers = OrderPlayers(availableplayers)
 	lineup, availableplayers = SetLineup(availableplayers, lineup)
 	lineup, availableplayers = SetUtils(availableplayers, lineup)
+	// lineup, availableplayers = SetIL(availableplayers, lineup)
+	// lineup = SetBN(availableplayers, lineup)
 	return lineup, availableplayers
 }
 
