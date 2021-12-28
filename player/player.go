@@ -67,6 +67,41 @@ func SetUtils(availableplayers []Player, lineup map[string]Player) (map[string]P
 	return lineup, availableplayers
 }
 
+func SetIL(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
+	a, b, c := 99
+	for i < len(availableplayers) {
+		if(availableplayers[i].status == "INJ"){
+			if _, ok := lineup["IL"]; ok {
+				if _, ok := lineup["IL2"]; ok {
+					if _, ok := lineup["IL3"]; ok {
+
+					} else {
+						lineup["IL3"] = availableplayers[i]
+						c = i
+					}
+				} else {
+					lineup["IL2"] = availableplayers[i]
+					b = i
+				}
+				} else {
+					lineup["IL"] = availableplayers[i]
+					a = i
+				}
+		}
+		i++
+	}
+	if(a != 99) {
+		availableplayers = Remove(availableplayers, a)
+	}
+	if (b != 99) {
+		availableplayers = Remove(availableplayers, b - 1)
+	}
+	if (c != 99) {
+		availableplayers = Remove(availableplayers, c - 2)
+	}
+	return lineup, availableplayers
+}
+
 func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
 	i := 0
 	j := 0
