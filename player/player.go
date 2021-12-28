@@ -102,6 +102,19 @@ func SetIL(availableplayers []Player, lineup map[string]Player) (map[string]Play
 	return lineup, availableplayers
 }
 
+func SetBN(availableplayers []Player, lineup map[string]Player) (map[string]Player) {
+	for i, b := range availableplayers {
+		if(i == 1) {
+			lineup("BN") = b
+		} else if(i==2) {
+			lineup("BN2") = b
+		} else if(i==3) {
+			lineup("BN3") = b
+		}
+	}
+	return lineup
+}
+
 func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
 	i := 0
 	j := 0
