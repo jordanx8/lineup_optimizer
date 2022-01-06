@@ -12,6 +12,9 @@ type Player struct {
 	FinalPosition string   `json:"finalposition"`
 }
 
+var playerGetsMoved bool
+var currentlineup = make(map[string]Player)
+
 func OptimizeLineup(availableplayers []Player) ([]Player, []Player) {
 	lineup := make(map[string]Player)
 	availableplayers = OrderPlayers(availableplayers)
