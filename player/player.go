@@ -152,57 +152,86 @@ func SetBN(availableplayers []Player, lineup map[string]Player) map[string]Playe
 	return lineup
 }
 
-func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
-	i := 0
-	j := 0
-	removed := false
+func SetLineup(availableplayers []Player) {
+	for i := 0; (len(currentlineup) < 9) && (i < len(availableplayers)); i++ {
+		playerGetsMoved = false
+		setLineupRecur(availableplayers[i], 0)
+	}
+	return
+}
 
-	for j < len(availableplayers) {
-		i = 0
-		for i < len(availableplayers[j].Positions) {
-			// fmt.Println("Checking if", availableplayers[j], "can be added to position", availableplayers[j].positions[i])
-			if _, ok := lineup[availableplayers[j].Positions[i]]; ok {
-				// fmt.Println(value, "already at position", availableplayers[j].positions[i])
-				if i == len(availableplayers[j].Positions)-1 {
-					// fmt.Println("No open spots available for", availableplayers[j])
-					k := 0
-					// fmt.Println("Checking if another player can be moved to make room for", availableplayers[j])
-					for k < len(availableplayers[j].Positions) {
-						if value, ok := lineup[availableplayers[j].Positions[k]]; ok {
-							// fmt.Println("Checking if", value, "at", availableplayers[j].positions[k], "can be moved")
-							l := 0
-							for l < len(value.Positions) {
-								if _, ok := lineup[value.Positions[l]]; ok {
-									// fmt.Println(value2, "already at position", value.positions[l])
-								} else {
-									// fmt.Println(value.positions[l], "IS OPEN")
-									lineup[value.Positions[l]] = value
-									// fmt.Println(value, "has been moved from", availableplayers[j].positions[k], "to", value.positions[l])
-									lineup[availableplayers[j].Positions[k]] = availableplayers[j]
-									// fmt.Println("Adding", availableplayers[j], "to position", availableplayers[j].positions[k])
-									availableplayers = Remove(availableplayers, j)
-									removed = true
-								}
-								l++
-							}
-						}
-						k++
-					}
-				}
-			} else {
-				// fmt.Println(availableplayers[j].positions[i], "position is open, adding", availableplayers[j], "to lineup")
-				lineup[availableplayers[j].Positions[i]] = availableplayers[j]
-				i = len(availableplayers[j].Positions) //end loop when player is added to lineup
-				availableplayers = Remove(availableplayers, j)
-				removed = true
-			}
-			i++
-		}
-		if removed {
-			removed = false
-		} else {
-			j++
+func setLineupRecur(player Player, depth int) {
+	if depth == 3 {
+		return
+	}
+	for j := 0; j < len(player.Positions); j++ {
+		if _, ok := currentlineup[player.Positions[j]]; !ok {
+			currentlineup[player.Positions[j]] = player
+			playerGetsMoved = true
+			return
 		}
 	}
-	return lineup, availableplayers
+	for k := 0; k < len(player.Positions); k++ {
+		setLineupRecur(currentlineup[player.Positions[k]], depth+1)
+		if playerGetsMoved {
+			currentlineup[player.Positions[k]] = player
+			return
+		}
+	}
+	return
 }
+
+// func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
+// 	i := 0
+// 	j := 0
+// 	removed := false
+
+// 	for j < len(availableplayers) {
+// 		i = 0
+// 		for i < len(availableplayers[j].Positions) {
+// 			// fmt.Println("Checking if", availableplayers[j], "can be added to position", availableplayers[j].positions[i])
+// 			if _, ok := lineup[availableplayers[j].Positions[i]]; ok {
+// 				// fmt.Println(value, "already at position", availableplayers[j].positions[i])
+// 				if i == len(availableplayers[j].Positions)-1 {
+// 					// fmt.Println("No open spots available for", availableplayers[j])
+// 					k := 0
+// 					// fmt.Println("Checking if another player can be moved to make room for", availableplayers[j])
+// 					for k < len(availableplayers[j].Positions) {
+// 						if value, ok := lineup[availableplayers[j].Positions[k]]; ok {
+// 							// fmt.Println("Checking if", value, "at", availableplayers[j].positions[k], "can be moved")
+// 							l := 0
+// 							for l < len(value.Positions) {
+// 								if _, ok := lineup[value.Positions[l]]; ok {
+// 									// fmt.Println(value2, "already at position", value.positions[l])
+// 								} else {
+// 									// fmt.Println(value.positions[l], "IS OPEN")
+// 									lineup[value.Positions[l]] = value
+// 									// fmt.Println(value, "has been moved from", availableplayers[j].positions[k], "to", value.positions[l])
+// 									lineup[availableplayers[j].Positions[k]] = availableplayers[j]
+// 									// fmt.Println("Adding", availableplayers[j], "to position", availableplayers[j].positions[k])
+// 									availableplayers = Remove(availableplayers, j)
+// 									removed = true
+// 								}
+// 								l++
+// 							}
+// 						}
+// 						k++
+// 					}
+// 				}
+// 			} else {
+// 				// fmt.Println(availableplayers[j].positions[i], "position is open, adding", availableplayers[j], "to lineup")
+// 				lineup[availableplayers[j].Positions[i]] = availableplayers[j]
+// 				i = len(availableplayers[j].Positions) //end loop when player is added to lineup
+// 				availableplayers = Remove(availableplayers, j)
+// 				removed = true
+// 			}
+// 			i++
+// 		}
+// 		if removed {
+// 			removed = false
+// 		} else {
+// 			j++
+// 		}
+// 	}
+// 	return lineup, availableplayers
+// }
