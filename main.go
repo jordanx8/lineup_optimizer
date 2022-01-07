@@ -27,7 +27,10 @@ var sum float32
 func main() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 97cc3f0 (login page working/implemented new optimization)
 	// var username string
 
 	// fmt.Println("Enter email address/username: ")
@@ -37,9 +40,12 @@ func main() {
 
 	// lineup, bench := scrape.YahooScrape("***REMOVED***", "***REMOVED***")
 	// var sum float32
+<<<<<<< HEAD
 >>>>>>> c38d8ca (exe)
 =======
 >>>>>>> 30f91a2 (loading page created)
+=======
+>>>>>>> 97cc3f0 (login page working/implemented new optimization)
 
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
@@ -49,11 +55,18 @@ func main() {
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(
 			http.StatusOK,
+<<<<<<< HEAD
 			"login.html",
+=======
+			// Use the index.html template
+			"login.html",
+			// Pass the data that the page uses (in this case, 'title')
+>>>>>>> 97cc3f0 (login page working/implemented new optimization)
 			gin.H{},
 		)
 	})
 	router.POST("/", performLogin)
+<<<<<<< HEAD
 	router.GET("/loading", func(c *gin.Context) {
 		c.HTML(
 			http.StatusOK,
@@ -64,6 +77,15 @@ func main() {
 	router.GET("/table", func(c *gin.Context) {
 		c.HTML(
 			http.StatusOK,
+=======
+	router.GET("/table", func(c *gin.Context) {
+
+		// Call the HTML method of the Context to render a template
+		c.HTML(
+			// Set the HTTP status to 200 (OK)
+			http.StatusOK,
+			// Use the index.html template
+>>>>>>> 97cc3f0 (login page working/implemented new optimization)
 			"playertable.html",
 			gin.H{
 				"playerlineup": lineup,
@@ -75,6 +97,7 @@ func main() {
 	router.Run()
 }
 
+<<<<<<< HEAD
 func performLogin(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
@@ -89,4 +112,18 @@ func performLogin(c *gin.Context) {
 		}
 		c.Redirect(http.StatusMovedPermanently, "/table")
 	}
+=======
+func loginScrape(username, password string) bool {
+	return false
+}
+
+func performLogin(c *gin.Context) {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	lineup, bench = scrape.YahooScrape(username, password)
+	for _, v := range lineup {
+		sum += v.Points
+	}
+	c.Redirect(http.StatusMovedPermanently, "/table")
+>>>>>>> 97cc3f0 (login page working/implemented new optimization)
 }
