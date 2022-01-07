@@ -1,7 +1,7 @@
 {{range .playerlineup }}
 <tr>
     <td><button class="squarebutton">{{ .FinalPosition }}</button></td>
-    <td class="player">{{ .Name }}</td>
+    <td><div><span class="player">{{ .Name }}</span> <span class="teaminfo">{{ .Info }}</span> <span class="status"> {{ .Status }}</span></div></td>
     <td>{{ .Points }}</td>
  </tr>
 {{end}}

@@ -117,9 +117,10 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 		if playerData[a+1] == "INJ" {
 			playerPoints[c] = 0
 		}
+		var info string = playerData[a]
 		positions = strings.Split(playerData[a][6:], ",")
 		positions = player.AddExtraPositions(positions)
-		players = append(players, *player.NewPlayer(b, positions, playerData[a+1], playerPoints[c]))
+		players = append(players, *player.NewPlayer(b, positions, playerData[a+1], info, playerPoints[c]))
 		a = a + 2
 		c++
 	}

@@ -51,10 +51,21 @@ tr:hover {
 
 .player {
 	color: #1f83ff;
-overflow: hidden;
-white-space: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .player:hover {
 	text-decoration: underline;
+}
+
+.teaminfo {
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.status {
+  white-space: nowrap;
+  font-size: 11px;
+  color: red
 }

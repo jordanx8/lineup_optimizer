@@ -8,46 +8,66 @@ type Player struct {
 	Name          string   `json:"name"`
 	Positions     []string `json:"positions"`
 	Status        string   `json:"status"`
+	Info          string   `json;"info"`
 	Points        float32  `json:"points"`
 	FinalPosition string   `json:"finalposition"`
 }
 
 var playerGetsMoved bool
 var currentlineup = make(map[string]Player)
+var playersused []Player
 
 func OptimizeLineup(availableplayers []Player) ([]Player, []Player) {
-	lineup := make(map[string]Player)
-	availableplayers = OrderPlayers(availableplayers)
-	lineup, availableplayers = SetLineup(availableplayers, lineup)
-	lineup, availableplayers = SetUtils(availableplayers, lineup)
-	lineup, availableplayers = SetIL(availableplayers, lineup)
-	lineup = SetBN(availableplayers, lineup)
+	availableplayers = orderPlayers(availableplayers)
+	setLineup(availableplayers)
+	// removes used players from availableplayers array
+	for i := range playersused {
+		for j := range availableplayers {
+			if playersused[i].Name == availableplayers[j].Name {
+				availableplayers = remove(availableplayers, j)
+				break
+			}
+		}
+	}
+	availableplayers = setUtils(availableplayers, currentlineup)
+	availableplayers = setIL(availableplayers, currentlineup)
+	setBN(availableplayers, currentlineup)
+	// create structs used for playertable.html template
 	var lineupstruct []Player
 	var benchilstruct []Player
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["PG"].Name, lineup["PG"].Positions, lineup["PG"].Status, lineup["PG"].Points, "PG"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["SG"].Name, lineup["SG"].Positions, lineup["SG"].Status, lineup["SG"].Points, "SG"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["G"].Name, lineup["G"].Positions, lineup["G"].Status, lineup["G"].Points, "G"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["SF"].Name, lineup["SF"].Positions, lineup["SF"].Status, lineup["SF"].Points, "SF"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["PF"].Name, lineup["PF"].Positions, lineup["PF"].Status, lineup["PF"].Points, "PF"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["F"].Name, lineup["F"].Positions, lineup["F"].Status, lineup["F"].Points, "F"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["C"].Name, lineup["C"].Positions, lineup["C"].Status, lineup["C"].Points, "C"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["C2"].Name, lineup["C2"].Positions, lineup["C2"].Status, lineup["C2"].Points, "C"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["Util"].Name, lineup["Util"].Positions, lineup["Util"].Status, lineup["Util"].Points, "Util"))
-	lineupstruct = append(lineupstruct, *NewPlayer(lineup["Util2"].Name, lineup["Util2"].Positions, lineup["Util2"].Status, lineup["Util2"].Points, "Util"))
-	benchilstruct = append(benchilstruct, *NewPlayer(lineup["BN"].Name, lineup["BN"].Positions, lineup["BN"].Status, lineup["BN"].Points, "BN"))
-	benchilstruct = append(benchilstruct, *NewPlayer(lineup["BN2"].Name, lineup["BN2"].Positions, lineup["BN2"].Status, lineup["BN2"].Points, "BN"))
-	benchilstruct = append(benchilstruct, *NewPlayer(lineup["BN3"].Name, lineup["BN3"].Positions, lineup["BN3"].Status, lineup["BN3"].Points, "BN"))
-	_, ok := lineup["IL"]
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["PG"].Name, currentlineup["PG"].Positions, currentlineup["PG"].Status, currentlineup["PG"].Info, currentlineup["PG"].Points, "PG"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["SG"].Name, currentlineup["SG"].Positions, currentlineup["SG"].Status, currentlineup["SG"].Info, currentlineup["SG"].Points, "SG"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["G"].Name, currentlineup["G"].Positions, currentlineup["G"].Status, currentlineup["G"].Info, currentlineup["G"].Points, "G"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["SF"].Name, currentlineup["SF"].Positions, currentlineup["SF"].Status, currentlineup["SF"].Info, currentlineup["SF"].Points, "SF"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["PF"].Name, currentlineup["PF"].Positions, currentlineup["PF"].Status, currentlineup["PF"].Info, currentlineup["PF"].Points, "PF"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["F"].Name, currentlineup["F"].Positions, currentlineup["F"].Status, currentlineup["F"].Info, currentlineup["F"].Points, "F"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["C"].Name, currentlineup["C"].Positions, currentlineup["C"].Status, currentlineup["C"].Info, currentlineup["C"].Points, "C"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["C2"].Name, currentlineup["C2"].Positions, currentlineup["C2"].Status, currentlineup["C2"].Info, currentlineup["C2"].Points, "C"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["Util"].Name, currentlineup["Util"].Positions, currentlineup["Util"].Status, currentlineup["Util"].Info, currentlineup["Util"].Points, "Util"))
+	lineupstruct = append(lineupstruct, *NewPlayer(currentlineup["Util2"].Name, currentlineup["Util2"].Positions, currentlineup["Util2"].Status, currentlineup["Util2"].Info, currentlineup["Util2"].Points, "Util"))
+	_, ok := currentlineup["BN"]
 	if ok {
-		benchilstruct = append(benchilstruct, *NewPlayer(lineup["IL"].Name, lineup["IL"].Positions, lineup["IL"].Status, lineup["IL"].Points, "IL"))
+		benchilstruct = append(benchilstruct, *NewPlayer(currentlineup["BN"].Name, currentlineup["BN"].Positions, currentlineup["BN"].Status, currentlineup["BN"].Info, currentlineup["BN"].Points, "BN"))
 	}
-	_, ok = lineup["IL2"]
+	_, ok = currentlineup["BN2"]
 	if ok {
-		benchilstruct = append(benchilstruct, *NewPlayer(lineup["IL2"].Name, lineup["IL2"].Positions, lineup["IL2"].Status, lineup["IL2"].Points, "IL"))
+		benchilstruct = append(benchilstruct, *NewPlayer(currentlineup["BN2"].Name, currentlineup["BN2"].Positions, currentlineup["BN2"].Status, currentlineup["BN2"].Info, currentlineup["BN2"].Points, "BN"))
 	}
-	_, ok = lineup["IL3"]
+	_, ok = currentlineup["BN3"]
 	if ok {
-		benchilstruct = append(benchilstruct, *NewPlayer(lineup["IL3"].Name, lineup["IL3"].Positions, lineup["IL3"].Status, lineup["IL3"].Points, "IL"))
+		benchilstruct = append(benchilstruct, *NewPlayer(currentlineup["BN3"].Name, currentlineup["BN3"].Positions, currentlineup["BN3"].Status, currentlineup["BN3"].Info, currentlineup["BN3"].Points, "BN"))
+	}
+	_, ok = currentlineup["IL"]
+	if ok {
+		benchilstruct = append(benchilstruct, *NewPlayer(currentlineup["IL"].Name, currentlineup["IL"].Positions, currentlineup["IL"].Status, currentlineup["IL"].Info, currentlineup["IL"].Points, "IL"))
+	}
+	_, ok = currentlineup["IL2"]
+	if ok {
+		benchilstruct = append(benchilstruct, *NewPlayer(currentlineup["IL2"].Name, currentlineup["IL2"].Positions, currentlineup["IL2"].Status, currentlineup["IL2"].Info, currentlineup["IL2"].Points, "IL"))
+	}
+	_, ok = currentlineup["IL3"]
+	if ok {
+		benchilstruct = append(benchilstruct, *NewPlayer(currentlineup["IL3"].Name, currentlineup["IL3"].Positions, currentlineup["IL3"].Status, currentlineup["IL3"].Info, currentlineup["IL3"].Points, "IL"))
 	}
 	return lineupstruct, benchilstruct
 }
@@ -76,97 +96,101 @@ func AddExtraPositions(positions []string) []string {
 	return positions
 }
 
-func NewPlayer(name string, positions []string, status string, points float32, finalposition ...string) *Player {
+func NewPlayer(name string, positions []string, status string, info string, points float32, finalposition ...string) *Player {
 	if len(finalposition) > 0 {
-		p := Player{Name: name, Positions: positions, Status: status, Points: points, FinalPosition: finalposition[0]}
+		p := Player{Name: name, Positions: positions, Status: status, Info: info, Points: points, FinalPosition: finalposition[0]}
 		return &p
 	} else {
-		p := Player{Name: name, Positions: positions, Status: status, Points: points, FinalPosition: ""}
+		p := Player{Name: name, Positions: positions, Status: status, Info: info, Points: points, FinalPosition: ""}
 		return &p
 	}
 
 }
 
-func OrderPlayers(availableplayers []Player) []Player {
+func orderPlayers(availableplayers []Player) []Player {
 	sort.SliceStable(availableplayers, func(i, j int) bool {
 		return availableplayers[i].Points > availableplayers[j].Points
 	})
 	return availableplayers
 }
 
-func Remove(slice []Player, s int) []Player {
+func remove(slice []Player, s int) []Player {
 	return append(slice[:s], slice[s+1:]...)
 }
 
-func SetUtils(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
-	lineup["Util"] = availableplayers[0]
-	lineup["Util2"] = availableplayers[1]
-	availableplayers = Remove(availableplayers, 0)
-	availableplayers = Remove(availableplayers, 0)
-	return lineup, availableplayers
+func setUtils(availableplayers []Player, currentlineup map[string]Player) []Player {
+	currentlineup["Util"] = availableplayers[0]
+	currentlineup["Util2"] = availableplayers[1]
+	availableplayers = remove(availableplayers, 0)
+	availableplayers = remove(availableplayers, 0)
+	return availableplayers
 }
 
-func SetIL(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
+func setIL(availableplayers []Player, currentlineup map[string]Player) []Player {
 	a, b, c := 99, 99, 99
 	i := 0
 	for i < len(availableplayers) {
 		if availableplayers[i].Status == "INJ" {
-			if _, ok := lineup["IL"]; ok {
-				if _, ok := lineup["IL2"]; ok {
-					if _, ok := lineup["IL3"]; ok {
+			if _, ok := currentlineup["IL"]; ok {
+				if _, ok := currentlineup["IL2"]; ok {
+					if _, ok := currentlineup["IL3"]; ok {
 
 					} else {
-						lineup["IL3"] = availableplayers[i]
+						currentlineup["IL3"] = availableplayers[i]
 						c = i
 					}
 				} else {
-					lineup["IL2"] = availableplayers[i]
+					currentlineup["IL2"] = availableplayers[i]
 					b = i
 				}
 			} else {
-				lineup["IL"] = availableplayers[i]
+				currentlineup["IL"] = availableplayers[i]
 				a = i
 			}
 		}
 		i++
 	}
 	if a != 99 {
-		availableplayers = Remove(availableplayers, a)
+		availableplayers = remove(availableplayers, a)
 	}
 	if b != 99 {
-		availableplayers = Remove(availableplayers, b-1)
+		availableplayers = remove(availableplayers, b-1)
 	}
 	if c != 99 {
-		availableplayers = Remove(availableplayers, c-2)
+		availableplayers = remove(availableplayers, c-2)
 	}
-	return lineup, availableplayers
+	return availableplayers
 }
 
-func SetBN(availableplayers []Player, lineup map[string]Player) map[string]Player {
+func setBN(availableplayers []Player, currentlineup map[string]Player) map[string]Player {
 	for i, b := range availableplayers {
 		if i == 0 {
-			lineup["BN"] = b
+			currentlineup["BN"] = b
 		} else if i == 1 {
-			lineup["BN2"] = b
+			currentlineup["BN2"] = b
 		} else if i == 2 {
-			lineup["BN3"] = b
+			currentlineup["BN3"] = b
 		}
 	}
-	return lineup
+	return currentlineup
 }
 
-func SetLineup(availableplayers []Player) {
+func setLineup(availableplayers []Player) {
 	for i := 0; (len(currentlineup) < 9) && (i < len(availableplayers)); i++ {
 		playerGetsMoved = false
 		setLineupRecur(availableplayers[i], 0)
+		if playerGetsMoved {
+			playersused = append(playersused, availableplayers[i])
+		}
 	}
-	return
 }
 
 func setLineupRecur(player Player, depth int) {
+	//stop recursion at depth 3
 	if depth == 3 {
 		return
 	}
+	//checks to see if player can be added to an open position
 	for j := 0; j < len(player.Positions); j++ {
 		if _, ok := currentlineup[player.Positions[j]]; !ok {
 			currentlineup[player.Positions[j]] = player
@@ -174,6 +198,7 @@ func setLineupRecur(player Player, depth int) {
 			return
 		}
 	}
+	//checks if players at positions that currentplayer can play at are able to be moved
 	for k := 0; k < len(player.Positions); k++ {
 		setLineupRecur(currentlineup[player.Positions[k]], depth+1)
 		if playerGetsMoved {
@@ -181,60 +206,4 @@ func setLineupRecur(player Player, depth int) {
 			return
 		}
 	}
-	return
 }
-
-// func SetLineup(availableplayers []Player, lineup map[string]Player) (map[string]Player, []Player) {
-// 	i := 0
-// 	j := 0
-// 	removed := false
-
-// 	for j < len(availableplayers) {
-// 		i = 0
-// 		for i < len(availableplayers[j].Positions) {
-// 			// fmt.Println("Checking if", availableplayers[j], "can be added to position", availableplayers[j].positions[i])
-// 			if _, ok := lineup[availableplayers[j].Positions[i]]; ok {
-// 				// fmt.Println(value, "already at position", availableplayers[j].positions[i])
-// 				if i == len(availableplayers[j].Positions)-1 {
-// 					// fmt.Println("No open spots available for", availableplayers[j])
-// 					k := 0
-// 					// fmt.Println("Checking if another player can be moved to make room for", availableplayers[j])
-// 					for k < len(availableplayers[j].Positions) {
-// 						if value, ok := lineup[availableplayers[j].Positions[k]]; ok {
-// 							// fmt.Println("Checking if", value, "at", availableplayers[j].positions[k], "can be moved")
-// 							l := 0
-// 							for l < len(value.Positions) {
-// 								if _, ok := lineup[value.Positions[l]]; ok {
-// 									// fmt.Println(value2, "already at position", value.positions[l])
-// 								} else {
-// 									// fmt.Println(value.positions[l], "IS OPEN")
-// 									lineup[value.Positions[l]] = value
-// 									// fmt.Println(value, "has been moved from", availableplayers[j].positions[k], "to", value.positions[l])
-// 									lineup[availableplayers[j].Positions[k]] = availableplayers[j]
-// 									// fmt.Println("Adding", availableplayers[j], "to position", availableplayers[j].positions[k])
-// 									availableplayers = Remove(availableplayers, j)
-// 									removed = true
-// 								}
-// 								l++
-// 							}
-// 						}
-// 						k++
-// 					}
-// 				}
-// 			} else {
-// 				// fmt.Println(availableplayers[j].positions[i], "position is open, adding", availableplayers[j], "to lineup")
-// 				lineup[availableplayers[j].Positions[i]] = availableplayers[j]
-// 				i = len(availableplayers[j].Positions) //end loop when player is added to lineup
-// 				availableplayers = Remove(availableplayers, j)
-// 				removed = true
-// 			}
-// 			i++
-// 		}
-// 		if removed {
-// 			removed = false
-// 		} else {
-// 			j++
-// 		}
-// 	}
-// 	return lineup, availableplayers
-// }
