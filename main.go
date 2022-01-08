@@ -25,22 +25,6 @@ var bench []player.Player
 var sum float32
 
 func main() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	// var username string
-
-	// fmt.Println("Enter email address/username: ")
-	// fmt.Scanln(&username)
-
-	// // password := getPassword()
-
-	// lineup, bench := scrape.YahooScrape("***REMOVED***", "***REMOVED***")
-	// var sum float32
->>>>>>> c38d8ca (exe)
-=======
->>>>>>> 4303304 (loading page created)
-
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
 	router.StaticFile("/styles.css", "./static/css/styles.css")
