@@ -25,42 +25,31 @@ var bench []player.Player
 var sum float32
 
 func main() {
-	// var username string
-
-	// fmt.Println("Enter email address/username: ")
-	// fmt.Scanln(&username)
-
-	// // password := getPassword()
-
-	// lineup, bench := scrape.YahooScrape("***REMOVED***", "***REMOVED***")
-	// var sum float32
 
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
 	router.StaticFile("/styles.css", "./static/css/styles.css")
 	router.StaticFile("/loginstyles.css", "./static/css/loginstyles.css")
+	router.StaticFile("/loading.css", "./static/css/loading.css")
 	router.GET("/", func(c *gin.Context) {
-
-		// Call the HTML method of the Context to render a template
 		c.HTML(
-			// Set the HTTP status to 200 (OK)
 			http.StatusOK,
-			// Use the index.html template
 			"login.html",
-			// Pass the data that the page uses (in this case, 'title')
 			gin.H{},
 		)
 	})
 	router.POST("/", performLogin)
-	router.GET("/table", func(c *gin.Context) {
-
-		// Call the HTML method of the Context to render a template
+	router.GET("/loading", func(c *gin.Context) {
 		c.HTML(
-			// Set the HTTP status to 200 (OK)
 			http.StatusOK,
-			// Use the index.html template
+			"loading.html",
+			gin.H{},
+		)
+	})
+	router.GET("/table", func(c *gin.Context) {
+		c.HTML(
+			http.StatusOK,
 			"playertable.html",
-			// Pass the data that the page uses (in this case, 'title')
 			gin.H{
 				"playerlineup": lineup,
 				"bench":        bench,
@@ -71,16 +60,18 @@ func main() {
 	router.Run()
 }
 
-func loginScrape(username, password string) bool {
-	return false
-}
-
 func performLogin(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
-	lineup, bench = scrape.YahooScrape(username, password)
-	for _, v := range lineup {
-		sum += v.Points
+	ctx, url, cancel := scrape.LogIn(username, password)
+	if url == "" {
+		c.Redirect(http.StatusMovedPermanently, "/")
+	} else {
+		c.Redirect(http.StatusMovedPermanently, "/loading")
+		lineup, bench = scrape.YahooScrape(ctx, url, cancel)
+		for _, v := range lineup {
+			sum += v.Points
+		}
+		c.Redirect(http.StatusMovedPermanently, "/table")
 	}
-	c.Redirect(http.StatusMovedPermanently, "/table")
 }
