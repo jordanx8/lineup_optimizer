@@ -8,7 +8,7 @@ type Player struct {
 	Name          string   `json:"name"`
 	Positions     []string `json:"positions"`
 	Status        string   `json:"status"`
-	Info          string   `json;"info"`
+	Info          string   `json:"info"`
 	Points        float32  `json:"points"`
 	FinalPosition string   `json:"finalposition"`
 }

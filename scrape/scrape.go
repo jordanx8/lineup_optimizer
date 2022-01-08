@@ -13,33 +13,19 @@ import (
 	"github.com/jordanx8/lineup_optimizer/player"
 )
 
-var LoggedIn bool
+func YahooScrape(username string, password string) ([]player.Player, []player.Player) {
 
-// func TimeLogin(cancel context.CancelFunc) {
-// 	fmt.Println("timer start")
-// 	tryLoggingIn := time.NewTimer(15 * time.Second)
-// 	<-tryLoggingIn.C
-// 	fmt.Println("timer end", LoggedIn)
-// 	if !LoggedIn {
-// 		cancel()
-// 	}
-// }
-
-func LogIn(username string, password string) (context.Context, string, context.CancelFunc) {
-	LoggedIn = false
 	// create chrome instance
 	ctx, cancel := chromedp.NewContext(
 		context.Background(),
 	)
-	// defer cancel()
+	defer cancel()
 
 	// create a timeout
 	ctx, cancel = context.WithTimeout(ctx, 1*time.Minute)
-	// defer cancel()
+	defer cancel()
 
 	fmt.Println("Received username/password; logging in")
-	// go TimeLogin(cancel)
-
 	var nodes []*cdp.Node
 	// logs into yahoo with username/password and gets link for weekly lineup
 	err := chromedp.Run(ctx,
@@ -59,60 +45,14 @@ func LogIn(username string, password string) (context.Context, string, context.C
 		log.Fatal(err)
 	}
 	fmt.Println("Logged in. Attempting to scrape players' information.")
-	if nodes != nil {
-		LoggedIn = true
-	}
 
-	url := "https://basketball.fantasysports.yahoo.com/" + nodes[19].AttributeValue("href")
-	if LoggedIn {
-		return ctx, url, cancel
-	} else {
-		cancel()
-		return nil, "", nil
-	}
-
-}
-
-func YahooScrape(ctx context.Context, url string, cancel context.CancelFunc) ([]player.Player, []player.Player) {
-	defer cancel()
-	// // create chrome instance
-	// ctx, cancel := chromedp.NewContext(
-	// 	context.Background(),
-	// )
-	// defer cancel()
-
-	// // create a timeout
-	// ctx, cancel = context.WithTimeout(ctx, 1*time.Minute)
-	// defer cancel()
-
-	// fmt.Println("Received username/password; logging in")
-	// var nodes []*cdp.Node
-	// // logs into yahoo with username/password and gets link for weekly lineup
-	// err := chromedp.Run(ctx,
-	// 	chromedp.Navigate(`https://login.yahoo.com/`),
-	// 	chromedp.WaitVisible(`username-challenge`),
-	// 	chromedp.SetValue(`phone-no`, username),
-	// 	chromedp.Click(`login-signin`, chromedp.NodeVisible),
-	// 	chromedp.WaitVisible(`password-container`),
-	// 	chromedp.SetValue(`login-passwd`, password),
-	// 	chromedp.Click(`login-signin`, chromedp.NodeVisible),
-	// 	chromedp.WaitVisible(`ybar-logo`),
-	// 	chromedp.Navigate(`https://basketball.fantasysports.yahoo.com/`),
-	// 	chromedp.Sleep(2*time.Second),
-	// 	chromedp.Nodes(`I Navtarget yfa-rapid-beacon`, &nodes),
-	// )
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("Logged in. Attempting to scrape players' information.")
-
-	// var url = "https://basketball.fantasysports.yahoo.com/" + nodes[19].AttributeValue("href")
+	var url = "https://basketball.fantasysports.yahoo.com/" + nodes[19].AttributeValue("href")
 
 	var playerNames []string
 	var playerData []string
-	var nodes []*cdp.Node
+	nodes = nil
 	// navigates to weekly lineup and gathers players' names and info
-	err := chromedp.Run(ctx,
+	err = chromedp.Run(ctx,
 		chromedp.Navigate(url),
 		chromedp.Sleep(2*time.Second),
 		chromedp.Evaluate(`[...document.querySelectorAll('#statTable0 a.Nowrap')].map((e) => e.innerText)`, &playerNames),
@@ -186,27 +126,5 @@ func YahooScrape(ctx context.Context, url string, cancel context.CancelFunc) ([]
 	}
 
 	lineup, bench := player.OptimizeLineup(players)
-
-	// fmt.Println("Optimized Lineup:")
-	// fmt.Println("PG   -", lineup["PG"])
-	// fmt.Println("SG   -", lineup["SG"])
-	// fmt.Println("G    -", lineup["G"])
-	// fmt.Println("SF   -", lineup["SF"])
-	// fmt.Println("PF   -", lineup["PF"])
-	// fmt.Println("F    -", lineup["F"])
-	// fmt.Println("C    -", lineup["C"])
-	// fmt.Println("C    -", lineup["C2"])
-	// fmt.Println("Util -", lineup["Util"])
-	// fmt.Println("Util -", lineup["Util2"])
-	// fmt.Println("BN   -", lineup["BN"])
-	// fmt.Println("BN   -", lineup["BN2"])
-	// fmt.Println("BN   -", lineup["BN3"])
-	// fmt.Println("IL   -", lineup["IL"])
-	// fmt.Println("IL   -", lineup["IL2"])
-	// fmt.Println("IL   -", lineup["IL3"])
-	// fmt.Print("\n")
-	// fmt.Println("Press Enter to Exit")
-	// fmt.Scanln()
-	// fmt.Println("exiting...")
 	return lineup, bench
 }

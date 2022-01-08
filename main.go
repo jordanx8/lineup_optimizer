@@ -49,17 +49,12 @@ func main() {
 }
 
 func performLogin(c *gin.Context) {
+	sum = 0
 	username := c.PostForm("username")
 	password := c.PostForm("password")
-	ctx, url, cancel := scrape.LogIn(username, password)
-	if url == "" {
-		c.Redirect(http.StatusMovedPermanently, "/")
-	} else {
-		c.Redirect(http.StatusMovedPermanently, "/loading")
-		lineup, bench = scrape.YahooScrape(ctx, url, cancel)
-		for _, v := range lineup {
-			sum += v.Points
-		}
-		c.Redirect(http.StatusMovedPermanently, "/table")
+	lineup, bench = scrape.YahooScrape(username, password)
+	for _, v := range lineup {
+		sum += v.Points
 	}
+	c.Redirect(http.StatusMovedPermanently, "/table")
 }
