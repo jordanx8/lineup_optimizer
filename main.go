@@ -8,18 +8,6 @@ import (
 	"github.com/jordanx8/lineup_optimizer/scrape"
 )
 
-// func getPassword() string {
-// 	fmt.Println("Enter password: ")
-// 	// https://godoc.org/golang.org/x/crypto/ssh/terminal#ReadPassword
-// 	// terminal.ReadPassword accepts file descriptor as argument, returns byte slice and error.
-// 	password, e := term.ReadPassword(int(os.Stdin.Fd()))
-// 	if e != nil {
-// 		log.Fatal(e)
-// 	}
-// 	// Type cast byte slice to string.
-// 	return string(password)
-// }
-
 var lineup []player.Player
 var bench []player.Player
 var sum float32
