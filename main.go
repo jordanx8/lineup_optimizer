@@ -25,6 +25,7 @@ var bench []player.Player
 var sum float32
 
 func main() {
+
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
 	router.StaticFile("/styles.css", "./static/css/styles.css")
