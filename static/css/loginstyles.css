@@ -91,3 +91,7 @@
 .btn:active {
   background: #003abc;
 }
+
+.btn:disabled {
+    background: #003abc;
+}
