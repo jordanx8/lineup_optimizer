@@ -13,7 +13,7 @@ table, th, td {
 }
 
 table td:last-child {
-    width: 100%;
+  width: 100%;
 }
 
 th {
@@ -59,13 +59,11 @@ tr:hover {
 	text-decoration: underline;
 }
 
-.teaminfo {
+.teaminfo, .status {
   white-space: nowrap;
   font-size: 11px;
 }
 
 .status {
-  white-space: nowrap;
-  font-size: 11px;
   color: red
 }

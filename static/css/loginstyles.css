@@ -2,7 +2,7 @@
 	font-family: Helvetica;
 }
 
-.background{
+.background, .bgcolor {
     width:100%;
     height:100%;
     top:0px;
@@ -13,12 +13,6 @@
 
 .bgcolor {
     position:absolute;
-    width:100%;
-    height:100%;
-    top:0px;
-    left:0px;
-    bottom:0px;
-    right:0px;
     background-color:#f3f3f3;
     opacity:0.5;
 }
@@ -88,10 +82,6 @@
   background: #0f69ff;
 }
 
-.btn:active {
+.btn:active, .btn:disabled {
   background: #003abc;
-}
-
-.btn:disabled {
-    background: #003abc;
 }
