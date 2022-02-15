@@ -14,7 +14,6 @@ import (
 )
 
 func YahooScrape(username string, password string) ([]player.Player, []player.Player) {
-	start := time.Now()
 	options := append(chromedp.DefaultExecAllocatorOptions[:],
 		// block all images
 		chromedp.Flag("blink-settings", "imagesEnabled=false"),
@@ -60,8 +59,6 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 		log.Fatal(err)
 	}
 	fmt.Println("Logged in. Attempting to scrape players' information.")
-	duration := time.Since(start)
-	fmt.Println(duration)
 
 	var url = "https://basketball.fantasysports.yahoo.com/" + nodes[19].AttributeValue("href")
 
