@@ -2,6 +2,9 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jordanx8/lineup_optimizer/player"
@@ -15,7 +18,15 @@ var sum float32
 func main() {
 
 	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
+	var files []string
+	filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, ".html") {
+			files = append(files, path)
+		}
+		return nil
+	})
+
+	router.LoadHTMLFiles(files...)
 	router.StaticFile("/styles.css", "./static/css/styles.css")
 	router.StaticFile("/loginstyles.css", "./static/css/loginstyles.css")
 	router.StaticFile("/loading.css", "./static/css/loading.css")
