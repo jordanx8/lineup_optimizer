@@ -34,7 +34,7 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	}
 
 	// create a timeout
-	timeoutctx, cancel := context.WithTimeout(bctx, 30*time.Second)
+	timeoutctx, cancel := context.WithTimeout(bctx, 25*time.Second)
 	defer cancel()
 
 	fmt.Println("Received username/password; logging in")
@@ -60,6 +60,8 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 		log.Fatal(err)
 	}
 	fmt.Println("Logged in. Attempting to scrape players' information.")
+	duration := time.Since(start)
+	fmt.Println(duration)
 
 	var url = "https://basketball.fantasysports.yahoo.com/" + nodes[19].AttributeValue("href")
 
@@ -67,7 +69,7 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	var playerData []string
 	nodes = nil
 	// navigates to weekly lineup and gathers players' names and info
-	err = chromedp.Run(timeoutctx,
+	err = chromedp.Run(bctx,
 		chromedp.Navigate(url),
 		chromedp.Sleep(1*time.Second),
 		chromedp.Evaluate(`[...document.querySelectorAll('#statTable0 a.Nowrap')].map((e) => e.innerText)`, &playerNames),
@@ -85,7 +87,7 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	url = nodes[2].AttributeValue("href")
 	fmt.Println("Scanning Day 1")
 	// navigates to tab of daily projected fantasy scores and gathers first day of players' projected scores
-	err = chromedp.Run(timeoutctx,
+	err = chromedp.Run(bctx,
 		chromedp.Navigate(url),
 		chromedp.Sleep(1*time.Second),
 		chromedp.Evaluate(`[...document.querySelectorAll('td > div > span.Fw-b')].map((e) => e.innerText)`, &playerPointsStrings),
@@ -108,7 +110,7 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	day := 2
 	for day < 8 {
 		fmt.Printf("Scanning Day %d\n", day)
-		err = chromedp.Run(timeoutctx,
+		err = chromedp.Run(bctx,
 			chromedp.Evaluate(`[...document.querySelectorAll('td > div > span.Fw-b')].map((e) => e.innerText)`, &playerPointsStrings),
 			chromedp.Click(`Js-next Grid-u No-bdr-radius-start No-bdrstart Pstart-med Td-n Fz-xs `),
 			chromedp.Sleep(1*time.Second),
@@ -149,8 +151,6 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	}
 
 	lineup, bench := player.OptimizeLineup(players)
-	duration := time.Since(start)
-	fmt.Println(duration)
 
 	return lineup, bench
 }

@@ -1,4 +1,4 @@
-FROM golang:1.16.5 AS build-env
+FROM golang:latest AS build
 
 WORKDIR /app
 
@@ -10,16 +10,20 @@ RUN go mod download
 
 RUN go build -o /lineup-optimizer .
 
-FROM golang:1.16.5
+FROM chromedp/headless-shell:latest
 
 WORKDIR /app
 
-RUN apt update && apt -y upgrade 
-RUN apt -y install chromium
+RUN apt-get update; apt install dumb-init -y
+
+# RUN apt update && apt -y upgrade 
+# RUN apt -y install chromium
+
+ENTRYPOINT ["dumb-init", "--"]
 
 COPY templates ./
 COPY static ./
-COPY --from=build-env /lineup-optimizer ./
+COPY --from=build /lineup-optimizer ./
 
 EXPOSE 8080
 
