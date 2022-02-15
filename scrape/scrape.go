@@ -108,6 +108,7 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	for day < 8 {
 		fmt.Printf("Scanning Day %d\n", day)
 		err = chromedp.Run(bctx,
+			chromedp.WaitVisible(`td > div > span.Fw-b`),
 			chromedp.Evaluate(`[...document.querySelectorAll('td > div > span.Fw-b')].map((e) => e.innerText)`, &playerPointsStrings),
 			chromedp.Click(`Js-next Grid-u No-bdr-radius-start No-bdrstart Pstart-med Td-n Fz-xs `),
 			chromedp.Sleep(1*time.Second),
