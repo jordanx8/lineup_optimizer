@@ -27,13 +27,14 @@ func main() {
 		)
 	})
 	router.POST("/", performLogin)
-	router.GET("/loading", func(c *gin.Context) {
+	router.GET("/error", func(c *gin.Context) {
 		c.HTML(
 			http.StatusOK,
-			"loading.html",
+			"error.html",
 			gin.H{},
 		)
 	})
+	router.POST("/error", returnToLogin)
 	router.GET("/table", func(c *gin.Context) {
 		c.HTML(
 			http.StatusOK,
@@ -48,11 +49,19 @@ func main() {
 	router.Run()
 }
 
+func returnToLogin(c *gin.Context) {
+	c.Redirect(http.StatusMovedPermanently, "/")
+}
+
 func performLogin(c *gin.Context) {
 	sum = 0
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 	lineup, bench = scrape.YahooScrape(username, password)
+	if lineup == nil || bench == nil {
+		c.Redirect(http.StatusMovedPermanently, "/error")
+		return
+	}
 	for _, v := range lineup {
 		sum += v.Points
 	}
