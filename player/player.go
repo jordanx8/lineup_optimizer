@@ -18,6 +18,8 @@ var currentlineup = make(map[string]Player)
 var playersused []Player
 
 func OptimizeLineup(availableplayers []Player) ([]Player, []Player) {
+	currentlineup = make(map[string]Player)
+	playersused = nil
 	availableplayers = orderPlayers(availableplayers)
 	setLineup(availableplayers)
 	// removes used players from availableplayers array

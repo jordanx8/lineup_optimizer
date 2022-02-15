@@ -68,7 +68,8 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	// navigates to weekly lineup and gathers players' names and info
 	err = chromedp.Run(bctx,
 		chromedp.Navigate(url),
-		chromedp.Sleep(1*time.Second),
+		chromedp.WaitVisible(`#statTable0 a.Nowrap`),
+		chromedp.WaitVisible(`#statTable0 span.Fz-xxs`),
 		chromedp.Evaluate(`[...document.querySelectorAll('#statTable0 a.Nowrap')].map((e) => e.innerText)`, &playerNames),
 		chromedp.Evaluate(`[...document.querySelectorAll('#statTable0 span.Fz-xxs')].map((e) => e.innerText)`, &playerData),
 		chromedp.Nodes(`ul.Nav-h.Nav-bot-pointers-north.No-bdr > li.Navitem.Mstart-xxl.Ta-c > a.Navtarget.yfa-rapid-beacon`, &nodes),
@@ -86,10 +87,9 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	// navigates to tab of daily projected fantasy scores and gathers first day of players' projected scores
 	err = chromedp.Run(bctx,
 		chromedp.Navigate(url),
-		chromedp.Sleep(1*time.Second),
+		chromedp.WaitVisible(`td > div > span.Fw-b`),
 		chromedp.Evaluate(`[...document.querySelectorAll('td > div > span.Fw-b')].map((e) => e.innerText)`, &playerPointsStrings),
 		chromedp.Click(`Js-next Grid-u No-bdr-radius-start No-bdrstart Pstart-med Td-n Fz-xs`),
-		chromedp.Sleep(1*time.Second),
 	)
 	if err != nil {
 		if err == context.DeadlineExceeded {
@@ -111,7 +111,6 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 			chromedp.WaitVisible(`td > div > span.Fw-b`),
 			chromedp.Evaluate(`[...document.querySelectorAll('td > div > span.Fw-b')].map((e) => e.innerText)`, &playerPointsStrings),
 			chromedp.Click(`Js-next Grid-u No-bdr-radius-start No-bdrstart Pstart-med Td-n Fz-xs `),
-			chromedp.Sleep(1*time.Second),
 		)
 		if err != nil {
 			if err == context.DeadlineExceeded {
