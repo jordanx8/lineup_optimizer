@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/chromedp/cdproto/cdp"
@@ -13,8 +14,18 @@ import (
 	"github.com/jordanx8/lineup_optimizer/player"
 )
 
+var mutex sync.Mutex
+var wg sync.WaitGroup
+var playerPointsStrings []string
+var playerPoints []float32
+var playerNames []string
+var playerData []string
+
 func YahooScrape(username string, password string) ([]player.Player, []player.Player) {
-	start := time.Now()
+	playerPointsStrings = nil
+	playerPoints = nil
+	playerNames = nil
+	playerData = nil
 
 	// creates context with ExecAllocator
 	options := append(chromedp.DefaultExecAllocatorOptions[:],
@@ -52,6 +63,7 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 
 	urls := getDateURLs(editWeeklyLineupURL)
 
+	wg.Add(7)
 	playerNames, playerData, err := gatherPlayerInfo(browserContext, editWeeklyLineupURL)
 	if err != nil {
 		if err == context.DeadlineExceeded {
@@ -60,17 +72,7 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 		log.Fatal(err)
 	}
 
-	var playerPointsStrings []string
-	var playerPoints []float32
-	fmt.Println("Scanning Day 1")
-
-	playerPointsStrings, err = scanDay(browserContext, urls[0], playerPointsStrings)
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return nil, nil
-		}
-		log.Fatal(err)
-	}
+	scanDay(browserContext, urls[0], 1)
 	for _, b := range playerPointsStrings {
 		if s, err := strconv.ParseFloat(b, 32); err == nil {
 			playerPoints = append(playerPoints, float32(s))
@@ -80,22 +82,12 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	// loops and goes through each day of projected fantasy scores for the week and adds them together
 	day := 2
 	for day < 8 {
-		fmt.Printf("Scanning Day %d\n", day)
-		playerPointsStrings, err = scanDay(browserContext, urls[day-1], playerPointsStrings)
-		if err != nil {
-			if err == context.DeadlineExceeded {
-				return nil, nil
-			}
-			log.Fatal(err)
-		}
-		for a, b := range playerPointsStrings {
-			if s, err := strconv.ParseFloat(b, 32); err == nil {
-				playerPoints[a] = playerPoints[a] + float32(s)
-			}
-		}
+		go scanDay(browserContext, urls[day-1], day)
 		day++
 	}
+	wg.Wait()
 
+	//wait for variables to be set, then create necessary data structures
 	var players []player.Player
 	var positions []string
 	a := 0
@@ -118,23 +110,32 @@ func YahooScrape(username string, password string) ([]player.Player, []player.Pl
 	}
 
 	lineup, bench := player.OptimizeLineup(players)
-
-	duration := time.Since(start)
-	fmt.Println(duration)
-
 	return lineup, bench
 }
 
-func scanDay(browser context.Context, url string, playerPointsStrings []string) ([]string, error) {
+func scanDay(browser context.Context, url string, day int) {
+	fmt.Printf("Scanning Day %d\n", day)
+	defer fmt.Printf("Day %d Scanned\n", day)
 	newTab, cancel := context.WithTimeout(browser, 25*time.Second)
 	defer cancel()
-
+	mutex.Lock()
 	err := chromedp.Run(newTab,
 		chromedp.Navigate(url),
 		chromedp.WaitVisible(`td > div > span.Fw-b`),
 		chromedp.Evaluate(`[...document.querySelectorAll('td > div > span.Fw-b')].map((e) => e.innerText)`, &playerPointsStrings),
 	)
-	return playerPointsStrings, err
+	if err != nil {
+		log.Fatal(err)
+	}
+	if day > 1 {
+		for a, b := range playerPointsStrings {
+			if s, err := strconv.ParseFloat(b, 32); err == nil {
+				playerPoints[a] = playerPoints[a] + float32(s)
+			}
+		}
+		defer wg.Done()
+	}
+	mutex.Unlock()
 }
 
 func getDateURLs(originalURL string) []string {
@@ -158,9 +159,7 @@ func getDateURLs(originalURL string) []string {
 }
 
 func gatherPlayerInfo(browser context.Context, url string) ([]string, []string, error) {
-	var playerNames []string
-	var playerData []string
-
+	defer wg.Done()
 	newTab, cancel := context.WithTimeout(browser, 25*time.Second)
 	defer cancel()
 
