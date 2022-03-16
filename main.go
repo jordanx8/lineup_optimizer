@@ -14,6 +14,7 @@ import (
 var lineup []player.Player
 var bench []player.Player
 var sum float32
+var errorMessage string
 
 func main() {
 
@@ -42,7 +43,9 @@ func main() {
 		c.HTML(
 			http.StatusOK,
 			"error.html",
-			gin.H{},
+			gin.H{
+				"errorMessage": strings.Title(strings.ToLower(errorMessage)),
+			},
 		)
 	})
 	router.POST("/error", returnToLogin)
@@ -68,8 +71,8 @@ func performLogin(c *gin.Context) {
 	sum = 0
 	username := c.PostForm("username")
 	password := c.PostForm("password")
-	lineup, bench = scrape.YahooScrape(username, password)
-	if lineup == nil || bench == nil {
+	lineup, bench, errorMessage = scrape.YahooScrape(username, password)
+	if lineup == nil || bench == nil || errorMessage != "nil" {
 		c.Redirect(http.StatusMovedPermanently, "/error")
 		return
 	}
